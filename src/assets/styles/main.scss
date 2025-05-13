@@ -1,0 +1,9 @@
+@use "./components/variables" as vars; 
+@use "./components/layout" as layout;    
+@use "./components/buttons" as buttons;  
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
