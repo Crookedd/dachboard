@@ -1,0 +1,59 @@
+@use "./variables" as vars;
+@use "sass:color";
+
+.dashboard-containers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  grid-gap: 1rem; 
+  padding: 1rem;
+  flex-grow: 1;
+
+  .container-1,
+  .container-2,
+  .container-3,
+  .container-4,
+  .container-5,
+  .container-6 {
+    border: vars.$primary_color 2px solid;
+    border-radius: 10px;
+    margin: 0 auto; 
+    max-width: 100%;
+    width: calc(100% - 1rem);
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  }
+
+  .container-1 {
+    height: 269px;
+  }
+
+  .container-2 {
+    height: 269px;
+    width:  650px;
+  }
+
+  .container-3 {
+    height: 271px;
+  }
+
+  .container-4 {
+    height: 271px;
+  }
+
+  .container-5 {
+    height: 360px;
+  }
+
+  .container-6 {
+    height: 360px;
+  }
+}
+
+.container-das {
+  height: 100%; 
+  border: vars.$primary_color 2px solid;
+  border-radius: 10px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}

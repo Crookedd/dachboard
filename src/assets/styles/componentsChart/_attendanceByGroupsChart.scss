@@ -1,0 +1,62 @@
+@use "../components/variables" as vars;
+@use "sass:color";
+
+.attendance-groups-chart-container {
+  width: 95%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  .header-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0px 5px 16px;
+
+  p {
+    font-size: 20px;
+    color: vars.$text_color;
+    margin: 0;
+   }
+
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      
+
+      select {
+        padding: 5px 10px;
+        border-radius: 10px;
+        border: 1px solid vars.$primary_color;
+        font-size: 14px;
+        background-color: white;
+        color: #636161;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .navigation {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+
+    button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    span {
+      font-weight: bold;
+    }
+  }
+
+  .chart-wrapper {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+}
+

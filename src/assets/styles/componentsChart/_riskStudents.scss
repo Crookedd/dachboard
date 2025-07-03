@@ -1,0 +1,52 @@
+@use "../components/variables" as vars;
+@use "sass:color";
+
+.at-risk-container {
+  padding: 1rem;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+
+  p {
+    margin: 2px;
+    font-size: 20px;
+    text-align: center;
+    color: vars.$text_color;
+    margin-bottom: 1rem;
+  }
+
+  .table-wrapper {
+    overflow-y: auto;
+    flex-grow: 1;
+    border: 1px solid #5a5a5b2e;
+    border-radius: 4px;
+  }
+
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    cursor: pointer;
+    min-width: 600px;
+    background-color: color.adjust(#d6d6d6, $lightness: 35%);
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: color.adjust(#d6d6d6, $lightness: 35%);
+      color: #000;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:hover {
+      background-color: #c9c9c9;
+    }
+  }
+}

@@ -1,9 +1,21 @@
 @use "./components/variables" as vars; 
 @use "./components/layout" as layout;    
-@use "./components/buttons" as buttons;  
+@use "./components/buttons" as buttons; 
+ @use "./components/dashboard" as dashboard;
+ @use "./componentsChart/attendanceChart" as chart;
+ @use "./componentsChart/directionChart" as Dchart;
+ @use "./componentsChart/riskStudents" as riskTable;
+ @use "./componentsChart/attendanceByGroupsChart" as groupChart;
+ @use "./componentsChart/weeklyTrendChart.tsx" as weeklyChart;
 
 body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100%;
+  background: linear-gradient(
+    220deg,
+    rgba(5, 180, 255, 0.4) 13%,
+    rgba(137, 121, 255, 0.4) 44%,
+    rgba(31, 148, 255, 0.4) 100%
+  );
 }
