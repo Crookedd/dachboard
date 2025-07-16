@@ -38,6 +38,14 @@
       border-bottom: 1px solid #ccc;
     }
 
+    td:nth-child(3) {
+    text-align: center; // <-- центрируем третий столбец
+    }
+
+    th:nth-child(3) {
+    text-align: center; // и заголовок тоже
+    }
+
     th {
       background-color: color.adjust(#d6d6d6, $lightness: 35%);
       color: #000;
