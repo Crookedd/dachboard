@@ -1,0 +1,42 @@
+@use "../components/variables" as vars;
+
+.weekly-trend-chart-container {
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  .header-weekly {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 0px 5px 10px;
+
+    p {
+    font-size: 20px;
+    color: vars.$text_color;
+    margin: 0;
+    }
+
+    .filters {
+      display: flex;
+      gap: 0.75rem;
+
+      select {
+        padding: 5px 10px;
+        border-radius: 10px;
+        border: 1px solid vars.$primary_color;
+        font-size: 14px;
+        color: #636161;
+        cursor: pointer;
+        appearance: none;
+      }
+    }
+  }
+
+  .recharts-wrapper {
+    max-width: 100%;
+  }
+}
+

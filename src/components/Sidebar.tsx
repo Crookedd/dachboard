@@ -1,14 +1,31 @@
-import React from 'react';
+import React from "react";
+import { NavLink} from "react-router-dom";
 
 const Sidebar: React.FC = () => {
-  return (
-                <div className="sidebar">
-                <div className="sidebar-item active">Основное</div>
-                <div className="sidebar-item">Дисциплины</div>
-                <div className="sidebar-item">Преподаватели</div>
-                <div className="sidebar-item">Календарь</div>
-            </div>
 
+  return (
+    <div className="sidebar">
+      <div className="sidebar-spacing" />
+      <div className="sidebar-divider" />
+      <NavLink
+        to="/"
+        className={({ isActive }) =>
+          "sidebar-item" + (isActive ? " active" : "")
+        }
+         style={{ textDecoration: "none", color: "inherit" }}
+      >
+        Основное
+      </NavLink>
+      <NavLink
+        to="/table"
+        className={({ isActive }) =>
+          "sidebar-item" + (isActive ? " active" : "")
+        }
+         style={{ textDecoration: "none", color: "inherit" }}
+      >
+        Таблица
+      </NavLink>
+    </div>
   );
 };
 
