@@ -10,6 +10,21 @@
   justify-content: flex-start;
   overflow: hidden;
 
+      .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+
+    select,
+    button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+  }
+
   p {
     margin: 2px;
     font-size: 20px;

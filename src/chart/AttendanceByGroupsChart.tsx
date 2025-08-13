@@ -1,113 +1,74 @@
-import { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
-import {
-  addDays,
-  format,
-  startOfWeek,
-  eachDayOfInterval,
-} from "date-fns";
-import "react-datepicker/dist/react-datepicker.css";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer } from "recharts";
 
-interface AttendanceData {
-  date: string;
-  [group: string]: string | number;
+type GroupKey = "ПИ-221" | "МО-221" | "ФИТ-221";
+type WeekKey = "21.05 – 26.05" | "14.05 – 19.05";
+
+
+interface WeekData {
+  week: WeekKey;
+  data: Array<{ date: string } & Record<GroupKey, number>>;
+  trend: Record<GroupKey, "up" | "down">;
 }
 
+
+const weeks: WeekData[] = [
+  {
+    week: "21.05 – 26.05",
+    data: [
+      { date: "21.05", "ПИ-221": 27.11, "МО-221": 14.91, "ФИТ-221": 12 },
+      { date: "22.05", "ПИ-221": 74.84, "МО-221": 93.39, "ФИТ-221": 71 },
+      { date: "23.05", "ПИ-221": 66.79, "МО-221": 76.98, "ФИТ-221": 23.5 },
+      { date: "24.05", "ПИ-221": 25.59, "МО-221": 96.72, "ФИТ-221": 64.85 },
+      { date: "25.05", "ПИ-221": 98.41, "МО-221": 89.49, "ФИТ-221": 69.99 },
+      { date: "26.05", "ПИ-221": 76.26, "МО-221": 42.04, "ФИТ-221": 21.42 },
+    ],
+    trend: { "ПИ-221": "up", "МО-221": "down", "ФИТ-221": "down" }
+  },
+  {
+    week: "14.05 – 19.05",
+    data: [
+      { date: "14.05", "ПИ-221": 18.3, "МО-221": 27.91, "ФИТ-221": 40 },
+      { date: "15.05", "ПИ-221": 61.1, "МО-221": 85.3, "ФИТ-221": 45 },
+      { date: "16.05", "ПИ-221": 54.8, "МО-221": 70.4, "ФИТ-221": 70 },
+      { date: "17.05", "ПИ-221": 45.2, "МО-221": 75.3, "ФИТ-221": 71.2 },
+      { date: "18.05", "ПИ-221": 72.9, "МО-221": 91.0, "ФИТ-221": 62.1 },
+      { date: "19.05", "ПИ-221": 58.2, "МО-221": 50.3, "ФИТ-221": 52.3 },
+    ],
+    trend: { "ПИ-221": "down", "МО-221": "up", "ФИТ-221": "up" }
+  }
+];
+
+const extractMeta = (groupName: string) => {
+  const [direction, code] = groupName.split("-");
+  const year = parseInt(code?.slice(0, 1) || "0"); 
+  const groupYear = 2020 + year; 
+  const currentYear = new Date().getFullYear();
+  const course = Math.min(currentYear - groupYear + 1, 4).toString();
+
+  return { direction, course };
+};
+
 const AttendanceByGroupsChart = () => {
-  const [startDate, setStartDate] = useState<Date>(
-    startOfWeek(new Date(), { weekStartsOn: 1 })
-  );
-  const [data, setData] = useState<AttendanceData[]>([]);
-  const [prevData, setPrevData] = useState<AttendanceData[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState("1");
-  const [selectedDirection, setSelectedDirection] = useState("");
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [weekIndex, setWeekIndex] = useState(0);
+  const [selectedCourse, setSelectedCourse] = useState<string>("1");
+  const [selectedDirection, setSelectedDirection] = useState<string>("");
 
-  const fetchAttendance = async () => {
-    const formattedStart = format(startDate, "yyyy-MM-dd");
-    const formattedEnd = format(addDays(startDate, 6), "yyyy-MM-dd");
+  const current = weeks[weekIndex];
+  const previous = weeks[weekIndex + 1];
 
-    const params = new URLSearchParams({
-      start_date: formattedStart,
-      end_date: formattedEnd,
-      course: selectedCourse,
-    });
-    if (selectedDirection) params.append("direction", selectedDirection);
+  const allGroups = Object.keys(current.data[0]).filter((key) => key !== "date");
 
-    const res = await fetch(`${import.meta.env.VITE_API}/attendance_group/by-groups?${params}`);
-    const result = await res.json();
-    setData(fillMissingDates(result));
-  };
-
-  const fetchPrevWeek = async () => {
-    const prevStart = addDays(startDate, -7);
-    const formattedStart = format(prevStart, "yyyy-MM-dd");
-    const formattedEnd = format(addDays(prevStart, 6), "yyyy-MM-dd");
-
-    const params = new URLSearchParams({
-      start_date: formattedStart,
-      end_date: formattedEnd,
-      course: selectedCourse,
-    });
-    if (selectedDirection) params.append("direction", selectedDirection);
-
-    const res = await fetch(`${import.meta.env.VITE_API}/attendance_group/by-groups?${params}`);
-    const result = await res.json();
-    setPrevData(fillMissingDates(result, prevStart));
-  };
-
-  useEffect(() => {
-    fetchAttendance();
-    fetchPrevWeek();
-  }, [startDate, selectedCourse, selectedDirection]);
-
-  const groupKeys =
-    data.length > 0 ? Object.keys(data[0]).filter((k) => k !== "date") : [];
-
-  const fillMissingDates = (rawData: AttendanceData[], baseDate = startDate): AttendanceData[] => {
-    const allDates = eachDayOfInterval({
-      start: baseDate,
-      end: addDays(baseDate, 5),
-    }).map((d) => format(d, "dd.MM"));
-
-    const dataMap = new Map<string, AttendanceData>();
-    rawData.forEach((entry) => dataMap.set(entry.date, entry));
-
-    const allGroupKeys = rawData.reduce((acc, curr) => {
-      Object.keys(curr).forEach((key) => {
-        if (key !== "date") acc.add(key);
-      });
-      return acc;
-    }, new Set<string>());
-
-    return allDates.map((date) => {
-      if (dataMap.has(date)) return dataMap.get(date)!;
-      const empty: AttendanceData = { date };
-      allGroupKeys.forEach((g) => (empty[g] = 0));
-      return empty;
-    });
-  };
-
-  const getLineColor = (group: string): string => {
-    const avg = (arr: AttendanceData[]) =>
-      arr.reduce((sum, row) => sum + Number(row[group] || 0), 0) / (arr.length || 1);
-
-    const currentAvg = avg(data);
-    const prevAvg = avg(prevData);
-
-    if (currentAvg > prevAvg) return "green";
-    if (currentAvg < prevAvg) return "red";
-    return "#8884d8"; // neutral
+  const filteredGroups = allGroups.filter((group) => {
+    const { direction, course } = extractMeta(group);
+    const matchesCourse = course === selectedCourse;
+    const matchesDirection = selectedDirection ? direction === selectedDirection : true;
+    return matchesCourse && matchesDirection;
+  });
+  const getColor = (group: GroupKey): string => {
+  if (!previous) return "#8884d8";
+  return current.trend[group] === "up" ? "#34a853" : "#ea4335";
   };
 
   return (
@@ -115,80 +76,61 @@ const AttendanceByGroupsChart = () => {
       <div className="header-group">
         <p>Посещаемость по группам</p>
         <div className="filters">
-          <select
-            value={selectedCourse}
-            onChange={(e) => setSelectedCourse(e.target.value)}
-          >
+          <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
             <option value="1">1 Курс</option>
             <option value="2">2 Курс</option>
             <option value="3">3 Курс</option>
             <option value="4">4 Курс</option>
           </select>
-          <select
-            value={selectedDirection}
-            onChange={(e) => setSelectedDirection(e.target.value)}
-          >
+          <select value={selectedDirection} onChange={(e) => setSelectedDirection(e.target.value)}>
             <option value="">Направление...</option>
-            <option value="Прикладная информатика">ПИ</option>
-            <option value="Математическое обеспечение и администрирование">МОА</option>
-            <option value="Фундаментальная информатика">ФИТ</option>
+            <option value="ПИ">ПИ</option>
+            <option value="МО">МО</option>
+            <option value="ФИТ">ФИТ</option>
           </select>
         </div>
       </div>
 
-      <div className="navigation" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <button onClick={() => setStartDate((prev) => addDays(prev, -7))}>←</button>
-        <span
-          onClick={() => setIsCalendarOpen((prev) => !prev)}
-          style={{ cursor: "pointer", textDecoration: "underline" }}
+      <div className="navigation">
+        <button
+          onClick={() => setWeekIndex((i) => Math.min(i + 1, weeks.length - 1))}
+          disabled={weekIndex === weeks.length - 1}
         >
-          {format(startDate, "dd.MM.yyyy")} – {format(addDays(startDate, 6), "dd.MM.yyyy")}
-        </span>
-        <button onClick={() => setStartDate((prev) => addDays(prev, 7))}>→</button>
+          ←
+        </button>
+        <span>{current.week}</span>
+        <button
+          onClick={() => setWeekIndex((i) => Math.max(i - 1, 0))}
+          disabled={weekIndex === 0}
+        >
+          →
+        </button>
       </div>
-
-      {isCalendarOpen && (
-        <div style={{ marginTop: "8px" }}>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => {
-              if (date) {
-                setStartDate(startOfWeek(date, { weekStartsOn: 1 }));
-                setIsCalendarOpen(false);
-              }
-            }}
-            inline
-            calendarStartDay={1}
-          />
-        </div>
-      )}
-
-      <div className="chart-wrapper" style={{ height: "400px", marginTop: "20px" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
+      <div className="chart-wrapper">
+        <ResponsiveContainer width="100%" height={190}>
+        <LineChart data={current.data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" interval={0}/>
+            <XAxis dataKey="date" />
             <YAxis domain={[0, 100]} />
             <Tooltip />
             <Legend />
-            {groupKeys.map((group) => (
-              <Line
+            {filteredGroups.map((group) => (
+            <Line
                 key={group}
                 type="monotone"
                 dataKey={group}
-                stroke={getLineColor(group)}
+                stroke={getColor(group as GroupKey)}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
-              />
+            />
             ))}
-          </LineChart>
+        </LineChart>
         </ResponsiveContainer>
-      </div>
+        </div>
     </div>
   );
 };
 
 export default AttendanceByGroupsChart;
-
 

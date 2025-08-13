@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 type Student = {
-  full_name: string;
+  name: string;
   group: string;
   missed: number;
 };
 
-  const RiskStudents: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>([]);
+const initialStudents: Student[] = [
+  { name: 'Иванов Иван', group: 'ПИ-201', missed: 12 },
+  { name: 'Петров Петр', group: 'ФИТ-301', missed: 15 },
+  { name: 'Сидоров Сидор', group: 'МОА-101', missed: 11 },
+  { name: 'Алексеева Мария', group: 'ПИ-202', missed: 18 },
+  { name: 'Кузнецов Алексей', group: 'ФИТ-302', missed: 20 },
+  { name: 'Васильева Анна', group: 'МОА-102', missed: 13 },
+  { name: 'Смирнов Андрей', group: 'ПИ-203', missed: 14 },
+  { name: 'Николаева Ирина', group: 'ФИТ-303', missed: 17 },
+  { name: 'Орлов Дмитрий', group: 'МОА-103', missed: 16 },
+  { name: 'Григорьев Артем', group: 'ПИ-204', missed: 19 },
+];
+
+const RiskStudents: React.FC = () => {
+  const [students, setStudents] = useState<Student[]>(initialStudents);
   const [sortAsc, setSortAsc] = useState(true);
-
-  const fetchStudents = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API}/risk_students`);
-      const data = await response.json();
-      setStudents(data.data);
-    } catch (err) {
-      console.error("Ошибка загрузки:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   const handleSort = () => {
     const sorted = [...students].sort((a, b) =>
@@ -49,7 +48,7 @@ type Student = {
           <tbody>
             {students.map((student, index) => (
               <tr key={index}>
-                <td>{student.full_name}</td>
+                <td>{student.name}</td>
                 <td>{student.group}</td>
                 <td>{student.missed}</td>
               </tr>
