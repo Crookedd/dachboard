@@ -10,22 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Клонируем код (не используется для деплоя, но нужно для checkout)
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Настраиваем SSH
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      # 3. Деплой на сервер
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /apps/dachboard || exit
-            git pull origin main || exit
-            sudo docker-compose down || exit
-            sudo docker-compose up -d --build || exit
-            echo "Frontend deployment successful!"
-          EOF
+            set -e  # остановить выполнение при любой ошибке
 
+            echo "=== Updating code ==="
+            cd /apps/dachboard || exit
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== Rebuilding Docker containers ==="
+            sudo docker-compose down
+            sudo docker-compose up -d --build
+
+            echo "=== Deployment successful! ==="
+
+            echo "=== Last 20 lines of logs ==="
+            sudo docker-compose logs --tail=20
+          EOF
 
