@@ -56,7 +56,6 @@ const AttendanceByGroupsChart = () => {
   const [selectedDirection, setSelectedDirection] = useState<string>("");
 
   const current = weeks[weekIndex];
-  const previous = weeks[weekIndex + 1];
 
   const allGroups = Object.keys(current.data[0]).filter((key) => key !== "date");
 
@@ -66,10 +65,14 @@ const AttendanceByGroupsChart = () => {
     const matchesDirection = selectedDirection ? direction === selectedDirection : true;
     return matchesCourse && matchesDirection;
   });
-  const getColor = (group: GroupKey): string => {
-  if (!previous) return "#8884d8";
-  return current.trend[group] === "up" ? "#34a853" : "#ea4335";
-  };
+
+  const palette = [
+  "#9b59b6",
+  "#3498db",
+  "#1abc9c",
+];
+
+const getColor = (index: number) => palette[index % palette.length];
 
   return (
     <div className="attendance-groups-chart-container">
@@ -107,19 +110,19 @@ const AttendanceByGroupsChart = () => {
         </button>
       </div>
       <div className="chart-wrapper">
-        <ResponsiveContainer width="100%" height={190}>
+        <ResponsiveContainer width="100%" height="100%">
         <LineChart data={current.data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis domain={[0, 100]} />
             <Tooltip />
             <Legend />
-            {filteredGroups.map((group) => (
+            {filteredGroups.map((group, index) => (
             <Line
                 key={group}
                 type="monotone"
                 dataKey={group}
-                stroke={getColor(group as GroupKey)}
+                stroke={getColor(index)}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
