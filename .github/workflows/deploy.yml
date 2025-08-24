@@ -1,28 +1,42 @@
 name: Deploy to Server
 
+# Деплой при пуше в main
 on:
   push:
     branches:
-      - main   # деплой при пуше в main
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Клонируем код
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Настраиваем SSH для подключения к серверу
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      # 3. Подключаемся к серверу и выполняем команды
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /apps/dachboard
-            git pull
+
+            # Обновляем код
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Пересобираем и перезапускаем контейнер
             sudo docker-compose build --no-cache
             sudo docker-compose up -d
+
+            # Выводим логи для проверки
+            sudo docker-compose ps
+            sudo docker-compose logs --tail=20
           EOF
+
