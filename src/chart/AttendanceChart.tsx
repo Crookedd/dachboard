@@ -42,7 +42,6 @@ const AttendanceChart: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="attendance-chart">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -53,7 +52,6 @@ const AttendanceChart: React.FC = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
   );
 };
 

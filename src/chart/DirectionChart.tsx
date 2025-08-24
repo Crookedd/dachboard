@@ -48,7 +48,6 @@ const DirectionChart: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="direction-chart">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
@@ -65,7 +64,6 @@ const DirectionChart: React.FC = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
   );
 };
 

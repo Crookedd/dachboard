@@ -115,7 +115,7 @@ const AttendanceByStudentChart = () => {
           </button>
         </div>
 
-      <ResponsiveContainer width="100%" height={250}>
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
