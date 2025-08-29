@@ -10,28 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Скачиваем код Actions
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Deploy to server
+      # 2️⃣ Деплой файлов на сервер через rsync
+      - name: Deploy files to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /apps/dachboard || mkdir -p /apps/dachboard && cd /apps/dachboard
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }}" \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/apps/dachboard
 
-            if [ ! -d .git ]; then
-              git clone git@github.com:Crookedd/dachboard.git .
-            else
-              git fetch origin main
-              git reset --hard origin/main
-            fi
+      # 3️⃣ Собираем Docker на сервере
+      - name: Build & Run Docker on server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /apps/dachboard
 
+            # Останавливаем старые контейнеры
             sudo docker-compose down || true
-            sudo docker-compose up -d --build
-            echo "✅ Frontend deployed!"
+
+            # Пересобираем контейнер с нуля (Node 20)
+            sudo docker-compose build --no-cache || exit 1
+
+            # Запускаем контейнер
+            sudo docker-compose up -d || exit 1
+
+            echo "✅ Frontend deployed successfully!"
           EOF
+
+
 
