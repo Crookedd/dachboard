@@ -21,17 +21,17 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /apps/dachboard || exit
+            cd /apps/dachboard || mkdir -p /apps/dachboard && cd /apps/dachboard
 
             if [ ! -d .git ]; then
-              git clone git@github.com:${{ github.repository }} . || exit
+              git clone git@github.com:Crookedd/dachboard.git .
             else
-              git pull origin main || exit
+              git fetch origin main
+              git reset --hard origin/main
             fi
 
             sudo docker-compose down || true
-            sudo docker-compose up -d --build || exit
-
-            echo "✅ Frontend deployment successful!"
+            sudo docker-compose up -d --build
+            echo "✅ Frontend deployed!"
           EOF
 
